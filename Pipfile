@@ -1,0 +1,11 @@
+[[source]]
+url = "http://192.168.249.159:8081/repository/pypi-all/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
