@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+  db:
+    image: postgres:14.8-alpine
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata

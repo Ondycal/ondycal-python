@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Type, Union
 
 from pydantic import BaseModel, field_validator, root_validator
 
@@ -20,7 +20,7 @@ class ContinuousRange(BaseModel):
 
 
 class DiscreteRange(ContinuousRange):
-    type: Any
+    type: Type[Any]
 
 
 class VariableRangeConstraint(BaseModel):
