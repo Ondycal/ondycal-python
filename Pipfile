@@ -1,14 +1,17 @@
 [[source]]
-url = "https://pypi.org/simple"
+url = "https://pypi.iranrepo.ir/simple"
 verify_ssl = true
 name = "pypi"
 
 [packages]
 fastapi = "0.100.0"
-uvicorn = {extras = ["standard"], version = "*"}
-sqlalchemy = "*"
+uvicorn = {extras = ["standard"], version = "0.23.1"}
+sqlalchemy = "2.0.19"
 
 [dev-packages]
+black = "23.7.0"
+pre-commit = "3.3.3"
+ruff = "0.0.280"
 
 [requires]
 python_version = "3.10"

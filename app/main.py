@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 
-from app.routes import (
-    formula_router
-)
+from app.routes import formula_router
 
 
 app = FastAPI()
