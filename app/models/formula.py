@@ -1,7 +1,11 @@
 from enum import IntEnum
-from typing import Any, List, Optional, Type, Union
+from typing import Any, List, Optional, Type, TypeVar, Union
+from numbers import Number
 
 from pydantic import BaseModel, field_validator, root_validator
+
+
+N = TypeVar("N", bound=Number)
 
 
 class VariableConstraintEnum(IntEnum):
@@ -15,12 +19,12 @@ class VariableRangeEnum(IntEnum):
 
 
 class ContinuousRange(BaseModel):
-    min: Any
-    max: Any
+    min: N
+    max: N
 
 
 class DiscreteRange(ContinuousRange):
-    type: Type[Any]
+    type: Type[N]
 
 
 class VariableRangeConstraint(BaseModel):
@@ -37,9 +41,19 @@ class Variable(BaseModel):
     description: Optional[str] = None
     default: Optional[Any] = None
     constraint_type: Optional[VariableConstraintEnum] = None
-    constraint: Optional[
-        Union[VariableRangeConstraint, VariableListConstraint]
-    ] = None
+    constraint: Optional[Union[VariableRangeConstraint, VariableListConstraint]] = None
+
+    @root_validator(skip_on_failure=True)
+    def validate_constraint(cls, variable):
+        if (
+            variable["constraint_type"] == VariableConstraintEnum.range
+            and type(variable["constraint"]) == VariableRangeConstraint
+        ) or (
+            variable["constraint_type"] == VariableConstraintEnum.list
+            and type(variable["constraint"]) == VariableListConstraint
+        ):
+            return variable
+        raise ValueError("Invalid constraint")
 
 
 class OperatorEnum(IntEnum):
@@ -59,7 +73,7 @@ class Formula(BaseModel):
     variables: List[Variable]
     tokens: List[Union[str, Operator]]
 
-    @field_validator('variables')
+    @field_validator("variables")
     def unique_name_variables(cls, variables):
         unique_vars = set()
         for variable in variables:
@@ -67,12 +81,12 @@ class Formula(BaseModel):
                 unique_vars.add(variable.name)
                 continue
             raise ValueError("variable names must be unique!")
-        
+
         return variables
-        
+
     @root_validator(skip_on_failure=True)
     def validate_tokens(cls, formula):
-        variable_names = set(variable.name for variable in formula['variables'])
+        variable_names = set(variable.name for variable in formula["variables"])
         for token in formula["tokens"]:
             if type(token) is str and token not in variable_names:
                 raise ValueError("Unknown variable")
