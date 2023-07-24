@@ -21,5 +21,4 @@ async def formula_detail(formula_id: int):
 
 @router.post("/")
 def formula_create(formula: FormulaModel):
-    print(formula.tokens)
     return {}
