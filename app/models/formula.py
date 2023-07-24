@@ -2,7 +2,7 @@ from enum import IntEnum
 from typing import Any, List, Optional, Type, TypeVar, Union
 from numbers import Number
 
-from pydantic import BaseModel, field_validator, root_validator
+from pydantic import BaseModel, ConfigDict, field_validator, root_validator
 
 
 N = TypeVar("N", bound=Number)
@@ -19,6 +19,8 @@ class VariableRangeEnum(IntEnum):
 
 
 class ContinuousRange(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     min: N
     max: N
 
@@ -46,11 +48,15 @@ class Variable(BaseModel):
     @root_validator(skip_on_failure=True)
     def validate_constraint(cls, variable):
         if (
-            variable["constraint_type"] == VariableConstraintEnum.range
-            and type(variable["constraint"]) == VariableRangeConstraint
-        ) or (
-            variable["constraint_type"] == VariableConstraintEnum.list
-            and type(variable["constraint"]) == VariableListConstraint
+            (not variable["constraint_type"] and not variable["constraint"])
+            or (
+                variable["constraint_type"] == VariableConstraintEnum.range
+                and type(variable["constraint"]) == VariableRangeConstraint
+            )
+            or (
+                variable["constraint_type"] == VariableConstraintEnum.list
+                and type(variable["constraint"]) == VariableListConstraint
+            )
         ):
             return variable
         raise ValueError("Invalid constraint")
