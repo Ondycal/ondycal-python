@@ -5,7 +5,12 @@ from numbers import Number
 from pydantic import BaseModel, ConfigDict, field_validator, root_validator
 
 
-N = TypeVar("N", bound=Number)
+Num = TypeVar("Num", bound=Number)
+
+
+class ArbitraryTypeModel(BaseModel):
+    # TODO: improve code after pydantic update
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class VariableConstraintEnum(IntEnum):
@@ -18,15 +23,23 @@ class VariableRangeEnum(IntEnum):
     discrete = 2
 
 
-class ContinuousRange(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+class ContinuousRange(ArbitraryTypeModel):
+    min: Optional[Num] = None
+    max: Optional[Num] = None
 
-    min: N
-    max: N
+    @root_validator(skip_on_failure=True)
+    def validate_range(cls, range):
+        if ((range["min"] is not None) ^ (range["max"] is not None)) or (
+            range["min"] is not None
+            and range["max"] is not None
+            and range["min"] <= range["max"]
+        ):
+            return range
+        raise ValueError("Invalid range!")
 
 
 class DiscreteRange(ContinuousRange):
-    type: Type[N]
+    type: Type[Num]
 
 
 class VariableRangeConstraint(BaseModel):
@@ -34,8 +47,13 @@ class VariableRangeConstraint(BaseModel):
     range: Union[ContinuousRange, DiscreteRange]
 
 
-class VariableListConstraint(BaseModel):
-    items: List[Any]
+class VariableListConstraint(ArbitraryTypeModel):
+    items: List[Union[Num, str]]
+
+
+VariableConstraint = TypeVar(
+    "VariableConstraint", VariableRangeConstraint, VariableListConstraint
+)
 
 
 class Variable(BaseModel):
@@ -43,12 +61,12 @@ class Variable(BaseModel):
     description: Optional[str] = None
     default: Optional[Any] = None
     constraint_type: Optional[VariableConstraintEnum] = None
-    constraint: Optional[Union[VariableRangeConstraint, VariableListConstraint]] = None
+    constraint: Optional[VariableConstraint] = None
 
     @root_validator(skip_on_failure=True)
     def validate_constraint(cls, variable):
         if (
-            (not variable["constraint_type"] and not variable["constraint"])
+            (variable["constraint_type"] is None and variable["constraint"] is None)
             or (
                 variable["constraint_type"] == VariableConstraintEnum.range
                 and type(variable["constraint"]) == VariableRangeConstraint
