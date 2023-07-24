@@ -2,7 +2,7 @@ from enum import IntEnum
 from typing import Any, List, Optional, Type, TypeVar, Union
 from numbers import Number
 
-from pydantic import BaseModel, ConfigDict, field_validator, root_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
 Num = TypeVar("Num", bound=Number)
@@ -27,14 +27,12 @@ class ContinuousRange(ArbitraryTypeModel):
     min: Optional[Num] = None
     max: Optional[Num] = None
 
-    @root_validator(skip_on_failure=True)
-    def validate_range(cls, range):
-        if ((range["min"] is not None) ^ (range["max"] is not None)) or (
-            range["min"] is not None
-            and range["max"] is not None
-            and range["min"] <= range["max"]
+    @model_validator(mode="after")
+    def validate_range(self) -> "ContinuousRange":
+        if ((self.min is not None) ^ (self.max is not None)) or (
+            self.min is not None and self.max is not None and self.min <= self.max
         ):
-            return range
+            return self
         raise ValueError("Invalid range!")
 
 
@@ -63,20 +61,20 @@ class Variable(BaseModel):
     constraint_type: Optional[VariableConstraintEnum] = None
     constraint: Optional[VariableConstraint] = None
 
-    @root_validator(skip_on_failure=True)
-    def validate_constraint(cls, variable):
+    @model_validator(mode="after")
+    def validate_constraint(self) -> "Variable":
         if (
-            (variable["constraint_type"] is None and variable["constraint"] is None)
+            (self.constraint_type is None and self.constraint is None)
             or (
-                variable["constraint_type"] == VariableConstraintEnum.range
-                and type(variable["constraint"]) == VariableRangeConstraint
+                self.constraint_type == VariableConstraintEnum.range
+                and type(self.constraint) == VariableRangeConstraint
             )
             or (
-                variable["constraint_type"] == VariableConstraintEnum.list
-                and type(variable["constraint"]) == VariableListConstraint
+                self.constraint_type == VariableConstraintEnum.list
+                and type(self.constraint) == VariableListConstraint
             )
         ):
-            return variable
+            return self
         raise ValueError("Invalid constraint")
 
 
@@ -108,11 +106,11 @@ class Formula(BaseModel):
 
         return variables
 
-    @root_validator(skip_on_failure=True)
-    def validate_tokens(cls, formula):
-        variable_names = set(variable.name for variable in formula["variables"])
-        for token in formula["tokens"]:
+    @model_validator(mode="after")
+    def validate_tokens(self) -> "Formula":
+        variable_names = set(variable.name for variable in self.variables)
+        for token in self.tokens:
             if type(token) is str and token not in variable_names:
                 raise ValueError("Unknown variable")
 
-        return formula
+        return self

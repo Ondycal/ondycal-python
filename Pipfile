@@ -7,6 +7,8 @@ name = "pypi"
 fastapi = "0.100.0"
 uvicorn = {extras = ["standard"], version = "0.23.1"}
 sqlalchemy = "2.0.19"
+httpx = "0.24.1"
+pytest = "7.4.0"
 
 [dev-packages]
 black = "23.7.0"
