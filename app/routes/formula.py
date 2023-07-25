@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.models import FormulaModel
+from app.domains import FormulaModel
 
 
 router = APIRouter(

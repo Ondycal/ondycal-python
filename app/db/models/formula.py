@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String
 
-from app.db.init_db import Base
+from app.db.base_class import Base
 
 
 class Formula(Base):
-    __tablename__ = "formulas"
-
     id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)

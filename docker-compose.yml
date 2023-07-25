@@ -8,3 +8,21 @@ services:
       - .env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
+  app:
+    build:
+      context: .
+      dockerfile: web.dockerfile
+      args:
+        INSTALL_DEV: ${INSTALL_DEV-false}
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    volumes:
+      - ./app:/code/app
+      - ./alembic:/code/alembic
+
+volumes:
+  app-db-data:

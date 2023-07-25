@@ -10,6 +10,8 @@ sqlalchemy = "2.0.19"
 httpx = "0.24.1"
 pytest = "7.4.0"
 pydantic-settings = "*"
+alembic = "1.11.1"
+psycopg2-binary = "2.9.6"
 
 [dev-packages]
 black = "23.7.0"
