@@ -2,7 +2,7 @@ from enum import IntEnum
 from typing import Any, List, Optional, Type, TypeVar, Union
 from numbers import Number
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator, constr
 
 
 Num = TypeVar("Num", bound=Number)
@@ -55,7 +55,7 @@ VariableConstraint = TypeVar(
 
 
 class Variable(BaseModel):
-    name: str
+    name: constr(max_length=16)
     description: Optional[str] = None
     default: Optional[Any] = None
     constraint_type: Optional[VariableConstraintEnum] = None
@@ -91,7 +91,7 @@ class Operator(BaseModel):
 
 
 class Formula(BaseModel):
-    name: str
+    name: constr(max_length=32)
     variables: List[Variable]
     tokens: List[Union[str, Operator]]
 
@@ -116,3 +116,13 @@ class Formula(BaseModel):
                 raise ValueError("Unknown variable")
 
         return self
+
+
+class VariableValue(BaseModel):
+    name: constr(max_length=16)
+    value: Num
+
+
+class FormulaRun(BaseModel):
+    formula_id: int
+    variables: List[VariableValue]
