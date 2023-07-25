@@ -95,8 +95,7 @@ class Formula(BaseModel):
     variables: List[Variable]
     tokens: List[Union[str, Operator]]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator("variables")
     def unique_name_variables(cls, variables):

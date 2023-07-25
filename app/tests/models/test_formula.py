@@ -1,6 +1,6 @@
 import pytest
 
-from app.models.formula import ContinuousRange
+from app.domains.formula import ContinuousRange
 
 
 def test_continuous_range_without_min_max():
