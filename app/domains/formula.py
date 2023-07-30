@@ -2,7 +2,7 @@ from enum import IntEnum
 from typing import Any, List, Optional, Type, TypeVar, Union
 from numbers import Number
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator, constr
+from pydantic import BaseModel, ConfigDict, model_validator, constr
 
 
 Num = TypeVar("Num", bound=Number)
@@ -83,6 +83,8 @@ class OperatorEnum(IntEnum):
     minus = 2
     multiply = 3
     divide = 4
+    open_parentheses = 5
+    close_parentheses = 6
 
 
 class Operator(BaseModel):
@@ -97,20 +99,14 @@ class Formula(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_validator("variables")
-    def unique_name_variables(cls, variables):
-        unique_vars = set()
-        for variable in variables:
-            if variable.name not in unique_vars:
-                unique_vars.add(variable.name)
+    @model_validator(mode="after")
+    def validate(self) -> "Formula":
+        variable_names = set()
+        for variable in self.variables:
+            if variable.name not in variable_names:
+                variable_names.add(variable.name)
                 continue
             raise ValueError("variable names must be unique!")
-
-        return variables
-
-    @model_validator(mode="after")
-    def validate_tokens(self) -> "Formula":
-        variable_names = set(variable.name for variable in self.variables)
         for token in self.tokens:
             if type(token) is str and token not in variable_names:
                 raise ValueError("Unknown variable")
@@ -118,7 +114,7 @@ class Formula(BaseModel):
         return self
 
 
-class VariableValue(BaseModel):
+class VariableValue(ArbitraryTypeModel):
     name: constr(max_length=16)
     value: Num
 
