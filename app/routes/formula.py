@@ -22,3 +22,8 @@ async def formula_detail(formula_id: int):
 @router.post("/")
 def formula_create(formula: FormulaModel):
     return {}
+
+
+@router.post("/{formula_id}/run")
+def formula_run(formula_id: int):
+    pass

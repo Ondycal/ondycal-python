@@ -1,4 +1,8 @@
-from .formula import Formula as FormulaModel
+from .formula import Formula as FormulaModel, VariableConstraintEnum, VariableRangeEnum
 
 
-__all__ = ["FormulaModel"]
+__all__ = [
+    "FormulaModel",
+    "VariableConstraintEnum",
+    "VariableRangeEnum",
+]

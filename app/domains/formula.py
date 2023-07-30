@@ -42,7 +42,7 @@ class DiscreteRange(ContinuousRange):
 
 class VariableRangeConstraint(BaseModel):
     type: VariableRangeEnum
-    range: Union[ContinuousRange, DiscreteRange]
+    range: ContinuousRange | DiscreteRange
 
 
 class VariableListConstraint(ArbitraryTypeModel):
