@@ -13,6 +13,12 @@ repos:
         -   --unsafe
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+-   repo: https://github.com/codespell-project/codespell
+    rev: v2.2.4
+    hooks:
+    -   id: codespell
+        additional_dependencies:
+        -   tomli
 -   repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: v0.0.275
     hooks:
