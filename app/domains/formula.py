@@ -1,16 +1,10 @@
 from enum import IntEnum
-from typing import Any, List, Optional, Type, TypeVar, Union
-from numbers import Number
+from typing import Any, TypeVar
 
-from pydantic import BaseModel, ConfigDict, model_validator, constr
-
-
-Num = TypeVar("Num", bound=Number)
+from pydantic import BaseModel, ConfigDict, model_validator, constr, conset
 
 
-class ArbitraryTypeModel(BaseModel):
-    # TODO: improve code after pydantic update
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+Num = TypeVar("Num", int, float, str)
 
 
 class VariableConstraintEnum(IntEnum):
@@ -23,12 +17,9 @@ class VariableRangeEnum(IntEnum):
     discrete = 2
 
 
-class ContinuousRange(ArbitraryTypeModel):
-    min: Optional[Num] = None
-    max: Optional[Num] = None
-
+class VariableRange(BaseModel):
     @model_validator(mode="after")
-    def validate_range(self) -> "ContinuousRange":
+    def validate_range(self) -> "VariableRange":
         if ((self.min is not None) ^ (self.max is not None)) or (
             self.min is not None and self.max is not None and self.min <= self.max
         ):
@@ -36,8 +27,14 @@ class ContinuousRange(ArbitraryTypeModel):
         raise ValueError("Invalid range!")
 
 
-class DiscreteRange(ContinuousRange):
-    type: Type[Num]
+class ContinuousRange(VariableRange):
+    min: float | None = None
+    max: float | None = None
+
+
+class DiscreteRange(VariableRange):
+    min: int | None = None
+    max: int | None = None
 
 
 class VariableRangeConstraint(BaseModel):
@@ -45,8 +42,8 @@ class VariableRangeConstraint(BaseModel):
     range: ContinuousRange | DiscreteRange
 
 
-class VariableListConstraint(ArbitraryTypeModel):
-    items: List[Union[Num, str]]
+class VariableListConstraint(BaseModel):
+    items: conset(Num, min_length=1) | None
 
 
 VariableConstraint = TypeVar(
@@ -56,10 +53,10 @@ VariableConstraint = TypeVar(
 
 class Variable(BaseModel):
     name: constr(max_length=16)
-    description: Optional[str] = None
-    default: Optional[Any] = None
-    constraint_type: Optional[VariableConstraintEnum] = None
-    constraint: Optional[VariableConstraint] = None
+    description: str | None = None
+    default: Any | None = None
+    constraint_type: VariableConstraintEnum | None = None
+    constraint: VariableConstraint | None = None
 
     @model_validator(mode="after")
     def validate_constraint(self) -> "Variable":
@@ -89,13 +86,13 @@ class OperatorEnum(IntEnum):
 
 class Operator(BaseModel):
     type: OperatorEnum
-    name: Optional[str] = None
+    name: str | None = None
 
 
 class Formula(BaseModel):
     name: constr(max_length=32)
-    variables: List[Variable]
-    tokens: List[Union[str, Operator]]
+    variables: list[Variable]
+    tokens: list[str | Operator]
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -114,11 +111,11 @@ class Formula(BaseModel):
         return self
 
 
-class VariableValue(ArbitraryTypeModel):
+class VariableValue(BaseModel):
     name: constr(max_length=16)
     value: Num
 
 
 class FormulaRun(BaseModel):
     formula_id: int
-    variables: List[VariableValue]
+    variables: list[VariableValue]

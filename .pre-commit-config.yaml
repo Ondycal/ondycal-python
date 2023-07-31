@@ -30,4 +30,4 @@ repos:
     hooks:
     -   id: black
 exclude:
-    ^versions/
+    ^(alembic/versions/)
