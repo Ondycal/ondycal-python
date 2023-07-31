@@ -13,6 +13,7 @@ repos:
         -   --unsafe
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
+        exclude: ^versions/
 -   repo: https://github.com/codespell-project/codespell
     rev: v2.2.4
     hooks:
@@ -29,3 +30,4 @@ repos:
     rev: 23.3.0
     hooks:
     -   id: black
+        exclude: ^versions/
