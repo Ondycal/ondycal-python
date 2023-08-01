@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TypeVar
 
 from app.domains.formula import Operator, OperatorEnum
@@ -5,14 +7,14 @@ from app.domains.formula import Operator, OperatorEnum
 
 class Node:
     def __init__(
-        self, value: str | Operator = None, left: "Node" = None, right: "Node" = None
+        self, value: str | Operator = None, left: Node = None, right: Node = None
     ) -> None:
         self.value = value
         self.left = left
         self.right = right
 
 
-EN = TypeVar("EN", str | Operator | Node)
+EN = TypeVar("EN", str, Operator, Node)
 
 
 def last_occurrence(tokens: list[EN], element: str | Operator) -> int:

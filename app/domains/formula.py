@@ -20,6 +20,9 @@ class VariableRangeEnum(IntEnum):
 
 
 class VariableRange(BaseModel):
+    min: float | None = None
+    max: float | None = None
+
     @model_validator(mode="after")
     def validate_range(self) -> VariableRange:
         if ((self.min is not None) ^ (self.max is not None)) or (
@@ -30,8 +33,7 @@ class VariableRange(BaseModel):
 
 
 class ContinuousRange(VariableRange):
-    min: float | None = None
-    max: float | None = None
+    pass
 
 
 class DiscreteRange(VariableRange):
@@ -48,17 +50,12 @@ class VariableListConstraint(BaseModel):
     items: conset(Num, min_length=1) | None
 
 
-VariableConstraint = TypeVar(
-    "VariableConstraint", VariableRangeConstraint, VariableListConstraint
-)
-
-
 class Variable(BaseModel):
     name: constr(max_length=16)
     description: str | None = None
     default: Any | None = None
     constraint_type: VariableConstraintEnum | None = None
-    constraint: VariableConstraint | None = None
+    constraint: VariableRangeConstraint | VariableListConstraint | None = None
 
     @model_validator(mode="after")
     def validate_constraint(self) -> Variable:
