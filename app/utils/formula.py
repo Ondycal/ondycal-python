@@ -1,4 +1,4 @@
-from typing import List, TypeVar
+from typing import TypeVar
 
 from app.domains.formula import Operator, OperatorEnum
 
@@ -15,7 +15,7 @@ class Node:
 EN = TypeVar("EN", str | Operator | Node)
 
 
-def last_occurrence(tokens: List[EN], element: str | Operator) -> int:
+def last_occurrence(tokens: list[EN], element: str | Operator) -> int:
     for i, token in reversed(list(enumerate(tokens))):
         if (
             type(element) is Operator and getattr(token, "type", None) is element.type
@@ -25,7 +25,7 @@ def last_occurrence(tokens: List[EN], element: str | Operator) -> int:
     return -1
 
 
-def create_variable_expression(tokens: List[EN]) -> Node:
+def create_variable_expression(tokens: list[EN]) -> Node:
     if len(tokens) != 1 or type(tokens[0]) is Operator:
         raise ValueError("Invalid formula")
 
@@ -39,7 +39,7 @@ def create_variable_expression(tokens: List[EN]) -> Node:
             raise ValueError("Invalid formula")
 
 
-def create_multiply_expression_tree(tokens: List[EN]) -> Node:
+def create_multiply_expression_tree(tokens: list[EN]) -> Node:
     last_multiply_op_index: int = last_occurrence(
         tokens, Operator(type=OperatorEnum.multiply)
     )
@@ -55,7 +55,7 @@ def create_multiply_expression_tree(tokens: List[EN]) -> Node:
 
 
 # http://www.cs.ecu.edu/karl/5220/spr16/Notes/CFG/precedence.html
-def create_expression_tree(tokens: List[EN]) -> Node:
+def create_expression_tree(tokens: list[EN]) -> Node:
     last_sum_op_index: int = last_occurrence(tokens, Operator(type=OperatorEnum.plus))
     if last_sum_op_index == -1:
         return create_multiply_expression_tree(tokens)
