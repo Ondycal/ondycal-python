@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import IntEnum
 from typing import Any, TypeVar
 
@@ -19,7 +21,7 @@ class VariableRangeEnum(IntEnum):
 
 class VariableRange(BaseModel):
     @model_validator(mode="after")
-    def validate_range(self) -> "VariableRange":
+    def validate_range(self) -> VariableRange:
         if ((self.min is not None) ^ (self.max is not None)) or (
             self.min is not None and self.max is not None and self.min <= self.max
         ):
@@ -59,7 +61,7 @@ class Variable(BaseModel):
     constraint: VariableConstraint | None = None
 
     @model_validator(mode="after")
-    def validate_constraint(self) -> "Variable":
+    def validate_constraint(self) -> Variable:
         if (
             (self.constraint_type is None and self.constraint is None)
             or (
@@ -97,7 +99,7 @@ class Formula(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     @model_validator(mode="after")
-    def validate(self) -> "Formula":
+    def validate(self) -> Formula:
         variable_names = set()
         for variable in self.variables:
             if variable.name not in variable_names:
