@@ -88,12 +88,16 @@ class Operator(BaseModel):
     name: str | None = None
 
 
-class Formula(BaseModel):
+class FormulaBase(BaseModel):
     name: constr(max_length=32)
     variables: list[Variable]
-    tokens: list[str | Operator]
 
-    model_config = ConfigDict(from_attributes=True)
+
+Token = TypeVar("Token", str, Operator)
+
+
+class Formula(FormulaBase):
+    tokens: list[Token]
 
     @model_validator(mode="after")
     def validate(self) -> Formula:
@@ -108,6 +112,12 @@ class Formula(BaseModel):
                 raise ValueError("Unknown variable")
 
         return self
+
+
+class FormulaInDB(FormulaBase):
+    tree: list[Token]
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class VariableValue(BaseModel):

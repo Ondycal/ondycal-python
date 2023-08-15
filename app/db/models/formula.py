@@ -27,7 +27,7 @@ class Formula(Base):
     )
     tree: Mapped[dict] = mapped_column(JSON, nullable=False, default={})
 
-    variables: Mapped[list[Variable]] = relationship(back_populates="formula_id")
+    variables: Mapped[list[Variable]] = relationship(back_populates="formula")
 
 
 class Variable(Base):
@@ -40,11 +40,12 @@ class Variable(Base):
         Enum(VariableConstraintEnum)
     )
 
+    formula: Mapped[Formula] = relationship(back_populates="variables")
     variable_constraint_range: Mapped[VariableRangeConstraint] = relationship(
-        back_populates="range_constraint", uselist=False
+        back_populates="variable", uselist=False
     )
     variable_constraint_list: Mapped[VariableListConstraint] = relationship(
-        back_populates="list_constraint", uselist=False
+        back_populates="variable", uselist=False
     )
 
 
@@ -54,12 +55,15 @@ class VariableRangeConstraint(Base):
         Enum(VariableRangeEnum), nullable=False
     )
 
+    variable: Mapped[Variable] = relationship(
+        back_populates="variable_constraint_range"
+    )
     continuous_range: Mapped[VariableContinuousRangeConstraint] = relationship(
-        back_populates="continuous_constraint",
+        back_populates="constraint_range",
         uselist=False,
     )
     discrete_range: Mapped[VariableDiscreteRangeConstraint] = relationship(
-        back_populates="discrete_constraint",
+        back_populates="constraint_range",
         uselist=False,
     )
 
@@ -71,6 +75,10 @@ class VariableContinuousRangeConstraint(Base):
     min: Mapped[float | None] = mapped_column(nullable=True)
     max: Mapped[float | None] = mapped_column(nullable=True)
 
+    constraint_range: Mapped[VariableRangeConstraint] = relationship(
+        back_populates="continuous_range", uselist=False
+    )
+
 
 class VariableDiscreteRangeConstraint(Base):
     id: Mapped[int] = mapped_column(
@@ -79,7 +87,13 @@ class VariableDiscreteRangeConstraint(Base):
     min: Mapped[int | None] = mapped_column(nullable=True)
     max: Mapped[int | None] = mapped_column(nullable=True)
 
+    constraint_range: Mapped[VariableRangeConstraint] = relationship(
+        back_populates="discrete_range", uselist=False
+    )
+
 
 class VariableListConstraint(Base):
     id: Mapped[int] = mapped_column(ForeignKey("variable.id"), primary_key=True)
     items: Mapped[dict] = mapped_column(JSON, default=[])
+
+    variable: Mapped[Variable] = relationship(back_populates="variable_constraint_list")
