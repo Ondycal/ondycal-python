@@ -9,6 +9,7 @@ from sqlalchemy import (
     JSON,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
@@ -37,7 +38,7 @@ class Variable(Base):
     description: Mapped[str] = mapped_column(Text)
     default: Mapped[str] = mapped_column(Text)
     constraint_type: Mapped[VariableConstraintEnum] = mapped_column(
-        Enum(VariableConstraintEnum)
+        Enum(VariableConstraintEnum), nullable=True
     )
 
     formula: Mapped[Formula] = relationship(back_populates="variables")
@@ -46,6 +47,10 @@ class Variable(Base):
     )
     variable_constraint_list: Mapped[VariableListConstraint] = relationship(
         back_populates="variable", uselist=False
+    )
+
+    __table_args__ = (
+        UniqueConstraint("name", "formula_id", name="_variable_name_in_formula"),
     )
 
 

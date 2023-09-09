@@ -52,8 +52,8 @@ class VariableListConstraint(BaseModel):
 
 class Variable(BaseModel):
     name: constr(max_length=16)
-    description: str | None = None
-    default: Any | None = None
+    description: str | None = ""
+    default: Any | None = ""
     constraint_type: VariableConstraintEnum | None = None
     constraint: VariableRangeConstraint | VariableListConstraint | None = None
 
@@ -72,6 +72,11 @@ class Variable(BaseModel):
         ):
             return self
         raise ValueError("Invalid constraint")
+
+
+class VariableInDB(Variable):
+    id: int
+    formula_id: int
 
 
 class OperatorEnum(IntEnum):
@@ -115,6 +120,7 @@ class Formula(FormulaBase):
 
 
 class FormulaInDB(FormulaBase):
+    id: int
     tree: list[Token]
 
     model_config = ConfigDict(from_attributes=True)
